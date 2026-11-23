@@ -5,83 +5,96 @@ namespace BluetoothAudioBridge;
 
 /// <summary>
 /// A2DP Sink via the WinRT AudioPlaybackConnection API (Windows 10 2004+).
-/// Works with any phone/device acting as an A2DP source (iPhone, Android, ...).
+/// Works with any phone/device acting as an A2DP source.
 /// Windows decodes the stream and plays it on the endpoint chosen in the Volume mixer;
 /// raw PCM is never exposed to the app.
+///
+/// While "wanted", one loop keeps the connection alive: it (re)creates the connection when it is
+/// closed and tries to open it every few seconds, so a phone that comes back in range
+/// (or connects by itself) is picked up without any click.
 /// </summary>
 public sealed class BridgeService : IDisposable
 {
     public event Action<string>? Status;
 
+    const int RetryMs = 3000;
+
     AudioPlaybackConnection? _conn;
     string? _wantedId;      // non-null = user wants to stay connected
-    bool _retrying;
+    int _generation;        // bumped on every connect/disconnect so stale loops stop
+    string _last = "";
 
     public bool IsWanted => _wantedId != null;
-    public bool IsConnected => _conn != null;
+    public bool IsConnected => _conn?.State == AudioPlaybackConnectionState.Opened;
 
     // Paired devices that can act as an A2DP source. Pairing is done in Windows Settings.
     public static async Task<List<DeviceInformation>> ListPairedAsync() =>
         (await DeviceInformation.FindAllAsync(AudioPlaybackConnection.GetDeviceSelector())).ToList();
 
-    public async Task ConnectAsync(string deviceId)
+    public void Connect(string deviceId)
     {
+        CloseConn();
         _wantedId = deviceId;
-        Status?.Invoke("Connecting…");
-        try { await OpenAsync(); }
-        catch (Exception ex) { Status?.Invoke(ex.Message + " Retrying…"); _ = RetryLoop(); }
+        _ = Loop(++_generation);
     }
 
     public void Disconnect()
     {
         _wantedId = null;
+        _generation++;
         CloseConn();
-        Status?.Invoke("Disconnected");
+        Report("Disconnected");
     }
 
-    async Task OpenAsync()
+    async Task Loop(int gen)
     {
-        CloseConn();
-        var conn = AudioPlaybackConnection.TryCreateFromId(_wantedId!)
-            ?? throw new InvalidOperationException("Device not found or not paired.");
-        conn.StateChanged += OnStateChanged;
-        await conn.StartAsync();
-        var res = await conn.OpenAsync();
-        if (res.Status != AudioPlaybackConnectionOpenResultStatus.Success)
+        Report("Connecting…");
+        while (gen == _generation && _wantedId != null)
         {
-            conn.Dispose();
-            throw new InvalidOperationException(res.Status == AudioPlaybackConnectionOpenResultStatus.RequestTimedOut
-                ? "The phone did not answer (Bluetooth on? in range?)."
-                : "Connection refused by the device.");
+            try
+            {
+                if (_conn == null)
+                {
+                    var c = AudioPlaybackConnection.TryCreateFromId(_wantedId)
+                        ?? throw new InvalidOperationException("Device not found or not paired.");
+                    c.StateChanged += OnStateChanged;
+                    await c.StartAsync();
+                    _conn = c;
+                }
+                if (_conn.State != AudioPlaybackConnectionState.Opened)
+                {
+                    var res = await _conn.OpenAsync();
+                    if (gen != _generation) return;
+                    Report(res.Status == AudioPlaybackConnectionOpenResultStatus.Success
+                        ? "Connected — pick this PC as audio output on your phone"
+                        : "Waiting for your phone (Bluetooth on? in range?)…");
+                }
+            }
+            catch (Exception ex)
+            {
+                CloseConn();
+                Report(ex.Message + " Retrying…");
+            }
+            await Task.Delay(RetryMs);
         }
-        _conn = conn;
-        Status?.Invoke("Connected — now pick this PC as audio output on your phone");
     }
 
     void OnStateChanged(AudioPlaybackConnection c, object _)
     {
-        if (c.State == AudioPlaybackConnectionState.Closed && _wantedId != null && ReferenceEquals(c, _conn))
+        if (c.State == AudioPlaybackConnectionState.Closed && ReferenceEquals(c, _conn) && _wantedId != null)
         {
-            Status?.Invoke("Connection lost — reconnecting…");
-            _ = RetryLoop();
+            CloseConn(); // the loop recreates it
+            Report("Connection lost — reconnecting…");
         }
+        else if (c.State == AudioPlaybackConnectionState.Opened)
+            Report("Connected — pick this PC as audio output on your phone");
     }
 
-    async Task RetryLoop()
+    void Report(string s)
     {
-        if (_retrying) return;
-        _retrying = true;
-        try
-        {
-            while (_wantedId != null)
-            {
-                await Task.Delay(3000);
-                if (_wantedId == null) break;
-                try { await OpenAsync(); return; }
-                catch (Exception ex) { Status?.Invoke(ex.Message + " Retrying…"); }
-            }
-        }
-        finally { _retrying = false; }
+        if (s == _last) return;
+        _last = s;
+        Status?.Invoke(s);
     }
 
     void CloseConn()
@@ -90,5 +103,5 @@ public sealed class BridgeService : IDisposable
         if (c != null) { c.StateChanged -= OnStateChanged; c.Dispose(); }
     }
 
-    public void Dispose() => Disconnect();
+    public void Dispose() { _wantedId = null; _generation++; CloseConn(); }
 }
