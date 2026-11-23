@@ -70,7 +70,7 @@ that opens the A2DP sink profile. Windows then receives, decodes and plays the s
 
 ## Build from source
 
-Requires the [.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0) (or newer) on Windows.
+Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (or newer) on Windows.
 
 ```powershell
 git clone https://github.com/Eredesboi/bluetooth-audio-bridge.git
