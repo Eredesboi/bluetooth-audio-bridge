@@ -1,12 +1,24 @@
+using System.Diagnostics;
 using NAudio.CoreAudioApi;
 
 namespace BluetoothAudioBridge;
 
-/// <summary>Peak level (0..1) of this process's audio sessions on all active render devices.</summary>
+/// <summary>
+/// Peak level (0..1) of the phone's stream. Windows plays it from the audio service (svchost),
+/// not from this app, so that is the session we read. Read-only: nothing is captured or changed.
+/// </summary>
 public sealed class LevelMeter : IDisposable
 {
     readonly MMDeviceEnumerator _enum = new();
-    readonly int _pid = Environment.ProcessId;
+    readonly Dictionary<uint, bool> _isService = new(); // pid -> is a svchost process
+
+    bool IsService(uint pid)
+    {
+        if (pid == 0) return false;
+        if (_isService.TryGetValue(pid, out var v)) return v;
+        try { v = Process.GetProcessById((int)pid).ProcessName == "svchost"; } catch { v = false; }
+        return _isService[pid] = v;
+    }
 
     public float Read()
     {
@@ -19,7 +31,7 @@ public sealed class LevelMeter : IDisposable
                 for (int i = 0; i < sessions.Count; i++)
                 {
                     var s = sessions[i];
-                    if (s.GetProcessID == _pid) peak = Math.Max(peak, s.AudioMeterInformation.MasterPeakValue);
+                    if (IsService(s.GetProcessID)) peak = Math.Max(peak, s.AudioMeterInformation.MasterPeakValue);
                 }
             }
         }
