@@ -51,14 +51,14 @@ dotnet publish -c Release -r win-x64 --self-contained
 ## Usage
 
 1. **Pair your phone once** in Windows: Settings › Bluetooth & devices › Add device. (The app has a shortcut button if the list is empty.)
-2. Open the app, pick the phone in the list, click **Connect**.
+2. Open the app, pick the phone in the list, turn on the **Connection** switch.
 3. **On the phone, choose the PC as the audio output**
    (iPhone: AirPlay/output icon in the music player or Control Center; Android: media output picker).
    Without this step the sound stays on the phone.
-4. Play something. The ring around the button shows the live audio level.
-5. If the link drops (out of range, Bluetooth toggled), the app retries every 3 seconds until you click **Disconnect**.
+4. Play something. The audio level bar shows the live level.
+5. If the link drops (out of range, Bluetooth toggled), the app retries every 3 seconds until you turn the switch off.
 
-The app follows the Windows light/dark setting.
+The app follows the Windows light/dark setting and accent color.
 
 ## Use it with SteelSeries Sonar
 
@@ -72,16 +72,16 @@ Any other mixer or virtual cable works the same way: the app is a normal Windows
 ## Test procedure (iPhone 13 or any phone)
 
 1. Bluetooth on both devices. Pair the phone in Windows settings.
-2. Open the app → select the phone → **Connect**. Status turns to "Connected".
+2. Open the app → select the phone → turn on the switch. Status turns to "Connected".
 3. On the phone, select the PC as audio output, then play music or a video.
-4. Sound comes out of the PC and the ring animates.
+4. Sound comes out of the PC and the level bar moves.
 5. Walk away or toggle the phone's Bluetooth, then come back: status goes "Connection lost — reconnecting…" then "Connected" again.
 
 ## Known limitations
 
 - Output device is chosen in the Windows volume mixer only (the API does not expose it).
 - One phone at a time.
-- The level ring reads the audio session of this app's process. If Windows ever plays the stream under another process, the ring can stay empty while sound still plays.
+- The level bar reads the audio session of this app's process. If Windows ever plays the stream under another process, the bar can stay empty while sound still plays.
 - Not tested with every phone / Bluetooth adapter. Reports and pull requests welcome.
 
 ## Architecture
@@ -90,8 +90,8 @@ Any other mixer or virtual cable works the same way: the app is a normal Windows
 |---|---|
 | `BridgeService.cs` | A2DP Sink connection (`AudioPlaybackConnection`), paired device list, auto-reconnect |
 | `LevelMeter.cs` | Audio level of this app's sessions via WASAPI (NAudio) |
-| `MainWindow.xaml(.cs)` | WPF UI: device list, connect button with level ring, status |
-| `App.xaml(.cs)`, `Dark.xaml`, `Light.xaml`, `Themes.xaml` | Theme (follows Windows), shared styles |
+| `MainWindow.xaml(.cs)` | WPF UI (Windows 11 look): device list, connection switch, level bar |
+| `App.xaml(.cs)`, `Dark.xaml`, `Light.xaml`, `Themes.xaml` | Theme (follows Windows light/dark and accent), shared styles |
 
 Only dependency: [NAudio](https://github.com/naudio/NAudio) (MIT) for the level meter.
 
