@@ -12,6 +12,11 @@ Free, open source, no account, no cloud, no telemetry, no network access.
 Phone ──Bluetooth A2DP──▶ Windows ──▶ your default output device (speakers, headset, mixer…)
 ```
 
+<p align="center">
+  <img src="docs/screenshot-dark.png" alt="Bluetooth Audio Bridge, dark theme" width="320">
+  <img src="docs/screenshot-light.png" alt="Bluetooth Audio Bridge, light theme" width="320">
+</p>
+
 ## Features
 
 - Connect a paired phone with one switch
