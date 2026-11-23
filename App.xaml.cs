@@ -6,8 +6,13 @@ namespace BluetoothAudioBridge;
 
 public partial class App : Application
 {
+    Mutex? _single;
+
     protected override void OnStartup(StartupEventArgs e)
     {
+        // One instance only (a second one would fight for the same phone connection).
+        _single = new Mutex(true, "BluetoothAudioBridge.SingleInstance", out var first);
+        if (!first) { Shutdown(); return; }
         base.OnStartup(e);
         ApplyTheme();
         // Follow the Windows light/dark setting and accent color live.

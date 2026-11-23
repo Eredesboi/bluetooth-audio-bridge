@@ -56,7 +56,7 @@ dotnet publish -c Release -r win-x64 --self-contained
    (usually the output or cast icon in the music player or the quick settings panel).
    Without this step the sound stays on the phone.
 4. Play something. The audio level bar shows the live level.
-5. Auto-reconnect: the app remembers your phone and keeps trying every 3 seconds while the switch is on (also after a restart of the app). Turn on **Start with Windows** to launch it minimized at login; your phone then reconnects as soon as it is in range. Keep the window minimized, not closed.
+5. Auto-reconnect: the app remembers your phone and keeps trying every 3 seconds while the switch is on (also after a restart of the app). Turn on **Start with Windows** to launch it minimized at login; your phone then reconnects as soon as it is in range. Closing the window hides it in the notification area (the app keeps running; right-click the tray icon › Quit to exit). Only one instance runs at a time.
 
 The app follows the Windows light/dark setting and accent color.
 

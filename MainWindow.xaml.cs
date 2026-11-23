@@ -11,13 +11,15 @@ public partial class MainWindow : Window
     readonly LevelMeter _meter = new();
     readonly Settings _settings = Settings.Load();
     readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(50) };
+    readonly Tray _tray;
     double _level;
     bool _autoDone;
 
     public MainWindow()
     {
         InitializeComponent();
-        if (Environment.GetCommandLineArgs().Contains("--minimized")) WindowState = WindowState.Minimized;
+        _tray = new Tray(this);
+        if (Environment.GetCommandLineArgs().Contains("--minimized")) Loaded += (_, _) => Hide(); // start in the tray
         Startup.IsChecked = Settings.StartsWithWindows;
         _bridge.Status += s => Dispatcher.Invoke(() => SetStatus(s));
         _timer.Tick += (_, _) =>
@@ -28,12 +30,13 @@ public partial class MainWindow : Window
         };
         _timer.Start();
         Loaded += async (_, _) => await RefreshAsync();
-        Closed += (_, _) => { _bridge.Dispose(); _meter.Dispose(); };
+        Closed += (_, _) => { _bridge.Dispose(); _meter.Dispose(); _tray.Dispose(); };
     }
 
     void SetStatus(string text)
     {
         StatusText.Text = text;
+        _tray.SetText(text);
         Toggle.IsChecked = _bridge.IsWanted;
     }
 
