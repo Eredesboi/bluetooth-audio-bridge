@@ -7,6 +7,9 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Version>1.0.0</Version>
+    <Product>Bluetooth Audio Bridge</Product>
+    <Description>Use your PC as a Bluetooth speaker (A2DP sink) for any phone.</Description>
   </PropertyGroup>
   <ItemGroup>
     <Using Remove="System.Windows.Forms" />
