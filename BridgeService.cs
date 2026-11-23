@@ -16,7 +16,6 @@ namespace BluetoothAudioBridge;
 public sealed class BridgeService : IDisposable
 {
     public event Action<string>? Status;
-    public event Action? Opened;   // connected (possibly again): the stream may need re-routing
 
     const int RetryMs = 3000;
 
@@ -93,7 +92,6 @@ public sealed class BridgeService : IDisposable
 
     void Report(string s)
     {
-        if (s.StartsWith("Connected")) Opened?.Invoke();
         if (s == _last) return;
         _last = s;
         Status?.Invoke(s);

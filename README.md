@@ -1,14 +1,14 @@
 # Bluetooth Audio Bridge
 
 Turn your Windows PC into a Bluetooth speaker for **any phone or Bluetooth audio source**.
-The sound shows up in Windows as a **regular app** ("Bluetooth Audio Bridge"), so you can route it from the Windows volume mixer to any output: speakers, headset, a virtual audio device or a mixing app.
+The sound is played by Windows on your **default output device**, so it works with anything that is set as default: speakers, a headset, or a virtual audio device from a mixing app.
 
 - Free and open source (MIT)
 - No cloud, no telemetry, no network access at all
 - No driver, no extra software on the phone, no Wi-Fi
 
 ```
-Phone ──Bluetooth A2DP──▶ Windows (AudioPlaybackConnection) ──▶ Volume mixer ──▶ any output ──▶ headset
+Phone ──Bluetooth A2DP──▶ Windows (AudioPlaybackConnection) ──▶ default output device ──▶ headset
 ```
 
 ## Why this works (feasibility)
@@ -24,7 +24,7 @@ What that means:
 |---|---|
 | Native driver / C++ needed? | **No.** The API is usable straight from C#. |
 | Raw PCM access? | **No.** Windows plays the sound; the app never sees the samples. |
-| Choose the output device from code? | **No.** You pick it in the Windows volume mixer (per-app output). |
+| Choose the output device from code? | **No.** Windows plays the stream on the default output device (tested: per-app output settings are ignored for this stream). |
 | Latency | That of the Bluetooth codec (SBC/AAC), roughly 100–200 ms. Not reducible by the app. |
 | Hardware | Your Bluetooth adapter must support the A2DP Sink role (most recent adapters do). |
 
@@ -60,13 +60,11 @@ dotnet publish -c Release -r win-x64 --self-contained
 
 The app follows the Windows light/dark setting and accent color.
 
-## Route the sound to a specific output or mixer
+## Where does the sound go?
 
-1. Connect your phone and start playing so that the app appears in the mixer.
-2. Open Windows Settings › System › Sound › **Volume mixer** (button in the app).
-3. Find *Bluetooth Audio Bridge* and set its **Output device** (speakers, headset, virtual audio device…).
+To the **default output device** of Windows (Settings › System › Sound › Output). Set the device you want as default; if you use a mixing app or virtual audio device, make it the default output.
 
-The app is a normal Windows audio app, so any mixer or virtual audio device can pick it up.
+The app changes no Windows setting.
 
 ## Test procedure
 
@@ -78,7 +76,7 @@ The app is a normal Windows audio app, so any mixer or virtual audio device can 
 
 ## Known limitations
 
-- Output device is chosen in the Windows volume mixer only (the API does not expose it).
+- The sound always follows the Windows default output device (the Bluetooth stream ignores per-app output settings).
 - One phone at a time.
 - The level bar reads the audio session of this app's process. If Windows ever plays the stream under another process, the bar can stay empty while sound still plays.
 - Not tested with every phone / Bluetooth adapter. Reports and pull requests welcome.

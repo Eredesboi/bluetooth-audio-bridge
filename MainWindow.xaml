@@ -44,33 +44,6 @@
 
     <Border CornerRadius="8" Background="{DynamicResource Card}" BorderBrush="{DynamicResource Border}"
             BorderThickness="1" Padding="16,12" Margin="0,10,0,0">
-      <StackPanel>
-        <TextBlock Text="Sound output" FontSize="14"/>
-        <TextBlock Text="Where the phone's audio plays on this PC." FontSize="12" Foreground="{DynamicResource Muted}"
-                   Margin="0,2,0,10"/>
-        <Button x:Name="OutBtn" Style="{StaticResource PlainButton}" Click="OutBtn_Click"
-                HorizontalContentAlignment="Stretch" AutomationProperties.Name="Sound output device">
-          <DockPanel>
-            <TextBlock DockPanel.Dock="Right" Text="&#xE70D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="11"
-                       VerticalAlignment="Center" Foreground="{DynamicResource Muted}"/>
-            <TextBlock x:Name="OutName" Text="System default" FontSize="13" TextTrimming="CharacterEllipsis"
-                       HorizontalAlignment="Left"/>
-          </DockPanel>
-        </Button>
-        <Popup x:Name="OutPopup" PlacementTarget="{Binding ElementName=OutBtn}" Placement="Bottom" StaysOpen="False"
-               AllowsTransparency="True" Width="{Binding ActualWidth, ElementName=OutBtn}">
-          <Border CornerRadius="6" Background="{DynamicResource Card}" BorderBrush="{DynamicResource Border}"
-                  BorderThickness="1" Margin="0,4,0,0" Padding="2">
-            <ListBox x:Name="Outputs" MaxHeight="200" Background="Transparent" BorderThickness="0"
-                     ItemContainerStyle="{StaticResource OutputItem}" SelectionChanged="Outputs_SelectionChanged"
-                     AutomationProperties.Name="Output devices"/>
-          </Border>
-        </Popup>
-      </StackPanel>
-    </Border>
-
-    <Border CornerRadius="8" Background="{DynamicResource Card}" BorderBrush="{DynamicResource Border}"
-            BorderThickness="1" Padding="16,12" Margin="0,10,0,0">
       <DockPanel>
         <ToggleButton x:Name="Startup" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Startup_Click"
                       VerticalAlignment="Center" AutomationProperties.Name="Start with Windows"/>
@@ -92,7 +65,7 @@
       </StackPanel>
     </Border>
 
-    <Button Style="{StaticResource PlainButton}" Content="Open Windows volume mixer" Margin="0,16,0,0"
-            HorizontalAlignment="Left" Click="Mixer_Click"/>
+    <Button Style="{StaticResource PlainButton}" Content="Open Windows sound settings" Margin="0,16,0,0"
+            HorizontalAlignment="Left" Click="Sound_Click"/>
   </StackPanel>
 </Window>

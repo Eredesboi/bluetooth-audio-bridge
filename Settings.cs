@@ -9,7 +9,6 @@ public sealed class Settings
 {
     public string? DeviceId { get; set; }
     public bool AutoConnect { get; set; }
-    public string? OutputId { get; set; }   // null = system default
 
     static readonly string PathFile = System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BluetoothAudioBridge", "settings.json");

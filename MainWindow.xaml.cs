@@ -1,24 +1,19 @@
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Threading;
-using NAudio.CoreAudioApi;
 using Windows.Devices.Enumeration;
 
 namespace BluetoothAudioBridge;
-
-public sealed record OutputDevice(string? Id, string Name);
 
 public partial class MainWindow : Window
 {
     readonly BridgeService _bridge = new();
     readonly LevelMeter _meter = new();
     readonly Settings _settings = Settings.Load();
-    readonly Tray _tray;
     readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(50) };
-    readonly DispatcherTimer _routeTimer = new() { Interval = TimeSpan.FromSeconds(2) };
+    readonly Tray _tray;
     double _level;
-    bool _autoDone, _loadingOuts, _routeNeeded;
+    bool _autoDone;
 
     public MainWindow()
     {
@@ -34,15 +29,6 @@ public partial class MainWindow : Window
             Level.Value = _level;
         };
         _timer.Start();
-
-        // Windows only accepts per-app routing once this app has an audio session (stream playing),
-        // so the route is (re)applied every 2 s until it succeeds, and again after each (re)connection.
-        _routeNeeded = _settings.OutputId != null;
-        _bridge.Opened += () => Dispatcher.Invoke(() => _routeNeeded |= _settings.OutputId != null);
-        _routeTimer.Tick += (_, _) => TryRoute();
-        _routeTimer.Start();
-        LoadOutputs();
-
         Loaded += async (_, _) => await RefreshAsync();
         Closed += (_, _) => { _bridge.Dispose(); _meter.Dispose(); _tray.Dispose(); };
     }
@@ -97,45 +83,7 @@ public partial class MainWindow : Window
 
     void Startup_Click(object s, RoutedEventArgs e) => Settings.StartsWithWindows = Startup.IsChecked == true;
 
-    // Output selector: active playback devices only (no microphones, no disabled devices).
-    void LoadOutputs()
-    {
-        _loadingOuts = true;
-        var keep = (Outputs.SelectedItem as OutputDevice)?.Id ?? _settings.OutputId;
-        using var en = new MMDeviceEnumerator();
-        var list = new List<OutputDevice> { new(null, "System default") };
-        list.AddRange(en.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)
-            .Select(d => new OutputDevice(d.ID, d.FriendlyName)));
-        Outputs.ItemsSource = list;
-        var sel = list.FirstOrDefault(o => o.Id == keep) ?? list[0];
-        Outputs.SelectedItem = sel;
-        OutName.Text = sel.Name;
-        _loadingOuts = false;
-    }
-
-    void TryRoute()
-    {
-        if (_routeNeeded && AudioRouting.SetOutput(_settings.OutputId)) _routeNeeded = false;
-    }
-
-    void OutBtn_Click(object s, RoutedEventArgs e)
-    {
-        LoadOutputs(); // devices may have been enabled or unplugged since last time
-        OutPopup.IsOpen = true;
-    }
-
-    void Outputs_SelectionChanged(object s, SelectionChangedEventArgs e)
-    {
-        if (_loadingOuts || Outputs.SelectedItem is not OutputDevice o) return;
-        OutName.Text = o.Name;
-        _settings.OutputId = o.Id;
-        _settings.Save();
-        OutPopup.IsOpen = false;
-        _routeNeeded = true;
-        TryRoute();
-    }
-
     static void Open(string uri) => Process.Start(new ProcessStartInfo(uri) { UseShellExecute = true });
     void Bluetooth_Click(object s, RoutedEventArgs e) => Open("ms-settings:bluetooth");
-    void Mixer_Click(object s, RoutedEventArgs e) => Open("ms-settings:apps-volume");
+    void Sound_Click(object s, RoutedEventArgs e) => Open("ms-settings:sound");
 }
