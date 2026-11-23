@@ -1,14 +1,14 @@
 # Bluetooth Audio Bridge
 
-Turn your Windows PC into a Bluetooth speaker for **any phone** (iPhone, Android, anything that streams Bluetooth audio).
-The sound shows up in Windows as a **regular app** ("Bluetooth Audio Bridge"), so you can route it from the Windows volume mixer to any output: SteelSeries Sonar, Voicemeeter, your headset, etc.
+Turn your Windows PC into a Bluetooth speaker for **any phone or Bluetooth audio source**.
+The sound shows up in Windows as a **regular app** ("Bluetooth Audio Bridge"), so you can route it from the Windows volume mixer to any output: speakers, headset, a virtual audio device or a mixing app.
 
 - Free and open source (MIT)
 - No cloud, no telemetry, no network access at all
-- No driver, no extra software on the phone, no AirPlay, no Wi-Fi
+- No driver, no extra software on the phone, no Wi-Fi
 
 ```
-Phone ──Bluetooth A2DP──▶ Windows (AudioPlaybackConnection) ──▶ Volume mixer ──▶ Sonar / any output ──▶ headset
+Phone ──Bluetooth A2DP──▶ Windows (AudioPlaybackConnection) ──▶ Volume mixer ──▶ any output ──▶ headset
 ```
 
 ## Why this works (feasibility)
@@ -53,23 +53,22 @@ dotnet publish -c Release -r win-x64 --self-contained
 1. **Pair your phone once** in Windows: Settings › Bluetooth & devices › Add device. (The app has a shortcut button if the list is empty.)
 2. Open the app, pick the phone in the list, turn on the **Connection** switch.
 3. **On the phone, choose the PC as the audio output**
-   (iPhone: AirPlay/output icon in the music player or Control Center; Android: media output picker).
+   (usually the output or cast icon in the music player or the quick settings panel).
    Without this step the sound stays on the phone.
 4. Play something. The audio level bar shows the live level.
 5. If the link drops (out of range, Bluetooth toggled), the app retries every 3 seconds until you turn the switch off.
 
 The app follows the Windows light/dark setting and accent color.
 
-## Use it with SteelSeries Sonar
+## Route the sound to a specific output or mixer
 
-1. Install Sonar. It creates virtual outputs such as *SteelSeries Sonar - Gaming*, *- Media*, *- Chat*.
-2. Connect your phone and start playing so that the app appears in the mixer.
-3. Windows Settings › System › Sound › **Volume mixer** (button in the app) › *Bluetooth Audio Bridge* › Output device: **SteelSeries Sonar - Media** (or Gaming).
-4. Adjust that channel in Sonar.
+1. Connect your phone and start playing so that the app appears in the mixer.
+2. Open Windows Settings › System › Sound › **Volume mixer** (button in the app).
+3. Find *Bluetooth Audio Bridge* and set its **Output device** (speakers, headset, virtual audio device…).
 
-Any other mixer or virtual cable works the same way: the app is a normal Windows audio app.
+The app is a normal Windows audio app, so any mixer or virtual audio device can pick it up.
 
-## Test procedure (iPhone 13 or any phone)
+## Test procedure
 
 1. Bluetooth on both devices. Pair the phone in Windows settings.
 2. Open the app → select the phone → turn on the switch. Status turns to "Connected".
