@@ -1,0 +1,11 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <SolidColorBrush x:Key="Bg" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Color="#0d0d12"/>
+  <SolidColorBrush x:Key="Card" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Color="#1A1A1F"/>
+  <SolidColorBrush x:Key="Border" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Color="#2D2B55"/>
+  <SolidColorBrush x:Key="Selection" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Color="#262447"/>
+  <SolidColorBrush x:Key="Accent" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Color="#8B7BE8"/>
+  <SolidColorBrush x:Key="Orange" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Color="#F4A62A"/>
+  <SolidColorBrush x:Key="Text" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Color="#F0D9B5"/>
+  <SolidColorBrush x:Key="Muted" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Color="#B9B3C9"/>
+  <SolidColorBrush x:Key="Outline" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Color="#99ECE6E0"/>
+</ResourceDictionary>
